@@ -6,6 +6,7 @@ import HomePage from "./Pages/HomePage/HomePage";
 import NotFound from "./Pages/NotFound/NotFound";
 import Login from "./Pages/Login/Login";
 import Register from "./Pages/Register/Register";
+import AuthContextProvider from "./contexts/authContext";
 
 const routes = createBrowserRouter([
   {
@@ -25,7 +26,9 @@ const routes = createBrowserRouter([
 function App() {
   return (
     <>
-      <RouterProvider router={routes}></RouterProvider>
+        <AuthContextProvider >
+        <RouterProvider router={routes}/>
+      </AuthContextProvider>
     </>
   );
 }

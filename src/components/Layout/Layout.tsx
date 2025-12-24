@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../Navbar/Navbar";
 
 export default function Layout() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
