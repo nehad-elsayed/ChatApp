@@ -7,17 +7,48 @@ import NotFound from "./Pages/NotFound/NotFound";
 import Login from "./Pages/Login/Login";
 import Register from "./Pages/Register/Register";
 import AuthContextProvider from "./contexts/authContext";
-import {Toaster} from "react-hot-toast"
+import { Toaster } from "react-hot-toast";
+import ProtectedRoute from "./Routes/ProtectedRoutes";
+import ProtectedAuthRoute from "./Routes/ProtectedAuthRoutes";
 
 const routes = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: "chat", element: <Chat /> },
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
+      {
+        index: true,
+        element: (
+          <ProtectedRoute>
+            
+            <HomePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "chat",
+        element: (
+          <ProtectedRoute>
+            <Chat />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "login",
+        element: (
+          <ProtectedAuthRoute>
+            <Login />
+          </ProtectedAuthRoute>
+        ),
+      },
+      {
+        path: "register",
+        element: (
+          <ProtectedAuthRoute>
+            <Register />
+          </ProtectedAuthRoute>
+        ),
+      },
 
       { path: "/*", element: <NotFound /> },
     ],
@@ -27,9 +58,9 @@ const routes = createBrowserRouter([
 function App() {
   return (
     <>
-        <AuthContextProvider >
-        <RouterProvider router={routes}/>
-        <Toaster/>
+      <AuthContextProvider>
+        <RouterProvider router={routes} />
+        <Toaster />
       </AuthContextProvider>
     </>
   );
