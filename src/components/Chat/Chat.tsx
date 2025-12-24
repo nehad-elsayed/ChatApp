@@ -17,7 +17,8 @@ export default function Chat() {
   }
 
   return (
-    <Card className="w-full max-w-md h-[500px] flex flex-col">
+    <div className="flex justify-center items-center mt-5 p-5">
+        <Card className="w-full max-w-md  flex flex-col">
       <div className="p-3 border-b font-semibold">
         Chat App 💬
       </div>
@@ -34,5 +35,7 @@ export default function Chat() {
 
       <ChatInput onSend={handleSend} />
     </Card>
+    </div>
+  
   )
 }

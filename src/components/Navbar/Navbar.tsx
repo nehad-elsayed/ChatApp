@@ -1,12 +1,10 @@
-import { Button } from "@/components/ui/button";
+import { useAuth } from "@/Hooks/useAuth";
 import { Link } from "react-router-dom";
+import { Button } from "../ui/button";
 
-type Props = {
-  isLoggedIn: boolean;
-  onLogout: () => void;
-};
+export default function Navbar() {
+  const { isLoggedIn, logout } = useAuth();
 
-export default function Navbar({ isLoggedIn, onLogout }: Props) {
   return (
     <nav className="w-full border-b bg-background">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
@@ -17,20 +15,32 @@ export default function Navbar({ isLoggedIn, onLogout }: Props) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {!isLoggedIn ? (
+          {isLoggedIn ? (
+            <Button variant="destructive" onClick={logout}>
+              Logout
+            </Button>
+          ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link to="/login">Login</Link>
+              
+                <Link
+                  to="/login"
+                  className="text-sm font-medium text-foreground  transition-colors"
+                >
+                  Login
+                </Link>
               </Button>
 
               <Button asChild>
-                <Link to="/register">Register</Link>
+             
+                <Link
+                  to="/register"
+                  className="text-sm font-medium "
+                >
+                  Register
+                </Link>
               </Button>
             </>
-          ) : (
-            <Button variant="destructive" onClick={onLogout}>
-              Logout
-            </Button>
           )}
         </div>
       </div>

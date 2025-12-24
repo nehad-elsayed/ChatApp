@@ -1,23 +1,61 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/Hooks/useAuth";
+import toast from "react-hot-toast";
 
 export default function Login() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      await login(email, password);
+      navigate("/");
+    } catch (err: any) {
+      setError(err.message);
+      toast.error("invalid info");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <Card className="w-full max-w-sm animate-fade-in">
         <CardHeader>
-          <CardTitle className="text-center text-2xl">
-            Login
-          </CardTitle>
+          <CardTitle className="text-center text-2xl">Login</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <Input type="email" placeholder="Email" />
-          <Input type="password" placeholder="Password" />
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-          <Button className="w-full">Login</Button>
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+
+          <Button className="w-full" onClick={handleLogin} disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </Button>
 
           <p className="text-sm text-center text-muted-foreground">
             Don’t have an account?{" "}

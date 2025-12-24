@@ -7,6 +7,7 @@ import NotFound from "./Pages/NotFound/NotFound";
 import Login from "./Pages/Login/Login";
 import Register from "./Pages/Register/Register";
 import AuthContextProvider from "./contexts/authContext";
+import {Toaster} from "react-hot-toast"
 
 const routes = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ function App() {
     <>
         <AuthContextProvider >
         <RouterProvider router={routes}/>
+        <Toaster/>
       </AuthContextProvider>
     </>
   );

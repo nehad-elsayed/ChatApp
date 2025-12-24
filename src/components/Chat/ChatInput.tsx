@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import toast from "react-hot-toast"
 
 type Props = {
   onSend: (message: string) => void
@@ -12,6 +13,7 @@ export default function ChatInput({ onSend }: Props) {
   const send = () => {
     if (!value.trim()) return
     onSend(value)
+    toast.success("sent successfully")
     setValue("")
   }
 
