@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/Hooks/useAuth";
 import toast from "react-hot-toast";
+import { FirebaseError } from "firebase/app";
 
 export default function Login() {
   const { login } = useAuth();
@@ -12,19 +13,28 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    setError("");
+    if (!email.trim() || !password.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
     setLoading(true);
+
     try {
       await login(email, password);
       navigate("/");
-    } catch (err: any) {
-      setError(err.message);
-      toast.error("invalid info");
-    } finally {
+    } catch (error: unknown) {
+    if (error instanceof FirebaseError) {
+      toast.error(error.message);
+    } else if (error instanceof Error) {
+      toast.error(error.message);
+    } else {
+      toast.error("Something went wrong");
+    }
+  }  finally {
       setLoading(false);
     }
   };
@@ -51,7 +61,6 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
           <Button className="w-full" onClick={handleLogin} disabled={loading}>
             {loading ? "Logging in..." : "Login"}
