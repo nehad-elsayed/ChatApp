@@ -1,17 +1,29 @@
 import { useAuth } from "@/Hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
+import toast from "react-hot-toast";
 
 export default function Navbar() {
   const { isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (isLoggedIn) {
+      navigate("/");
+    } else {
+      toast.error("Please login first");
+    }
+  };
 
   return (
     <nav className="w-full border-b bg-background">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
-        {/* Logo */}
-        <Link to="/" className="font-bold text-lg">
+        <span
+          onClick={handleClick}
+          className="font-bold text-lg cursor-pointer"
+        >
           Chat App 💬
-        </Link>
+        </span>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
@@ -22,7 +34,6 @@ export default function Navbar() {
           ) : (
             <>
               <Button variant="ghost" asChild>
-              
                 <Link
                   to="/login"
                   className="text-sm font-medium text-foreground  transition-colors"
@@ -32,11 +43,7 @@ export default function Navbar() {
               </Button>
 
               <Button asChild>
-             
-                <Link
-                  to="/register"
-                  className="text-sm font-medium "
-                >
+                <Link to="/register" className="text-sm font-medium ">
                   Register
                 </Link>
               </Button>
