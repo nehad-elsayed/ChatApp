@@ -5,8 +5,10 @@ export default function HomePage() {
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
           Welcome to Chat App 💬
         </h1>
+
         <p className="text-muted-foreground text-lg">
-          Connect instantly, chat freely, and stay in touch with the people that matter.
+          Connect instantly, chat freely, and stay in touch with the people that
+          matter.
         </p>
       </div>
     </div>

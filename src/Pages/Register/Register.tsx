@@ -7,6 +7,8 @@ import { useAuth } from "@/Hooks/useAuth";
 import toast from "react-hot-toast";
 import { FirebaseError } from "firebase/app";
 
+
+
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -22,10 +24,9 @@ export default function Register() {
       return;
     }
     setLoading(true);
-
     try {
-      await register(email, password);
-      // username هنستخدمه بعدين (profile / database)
+      await register(email, password,username);
+      // username هنستخدمه بعدين (profile / database) 
       navigate("/");
     } catch (error: unknown) {
   if (error instanceof FirebaseError) {
@@ -39,6 +40,10 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
