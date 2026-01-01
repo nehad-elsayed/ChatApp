@@ -117,7 +117,7 @@ export default function Navbar() {
                 to="/chat"
                 className="text-sm font-bold hover:underline"
               >
-                My Chats
+              All Chats
               </Link>
             </>
           )}

@@ -17,9 +17,14 @@ export default function Chat() {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!selectedUser) return;
+    if (!selectedUser || !user?.uid) return;
 
-    const messagesRef = ref(db, `messages/${user?.uid}_${selectedUser.uid}`);
+    const chatId =
+      user.uid < selectedUser.uid
+        ? `${user.uid}_${selectedUser.uid}`
+        : `${selectedUser.uid}_${user.uid}`;
+
+    const messagesRef = ref(db, `messages/${chatId}`);
 
     const unsubscribe = onValue(messagesRef, (snapshot) => {
       const data = snapshot.val();
