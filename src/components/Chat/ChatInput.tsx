@@ -1,19 +1,22 @@
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import toast from "react-hot-toast";
 import { useAuth } from "@/Hooks/useAuth";
-import { push, ref,  runTransaction } from "firebase/database";
+import { push, ref, runTransaction } from "firebase/database";
 import { db } from "@/firebase/firebaseConfig";
 import type { ChatUser } from "@/Types/backendTypes";
+import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
+import { Smile } from "lucide-react";
 
 export default function ChatInput({
   selectedUser,
 }: {
   selectedUser: ChatUser;
 }) {
-  const [value, setValue] = useState("");
   const { user } = useAuth();
+  const [value, setValue] = useState("");
+  const [showEmojis, setShowEmojis] = useState(false);
 
   if (!user) return null;
 
@@ -22,37 +25,53 @@ export default function ChatInput({
       ? `${user.uid}_${selectedUser.uid}`
       : `${selectedUser.uid}_${user.uid}`;
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim()) {
-      toast.error("empty message");
-      return;
-    } else {
-      toast.success("sent successfully");
-    }
-    //sending msg
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setValue((prev) => prev + emojiData.emoji);
+  };
+
+  const handleSend = async () => {
+    if (!value.trim()) return;
+
     await push(ref(db, `messages/${chatId}`), {
-      text,
+      text: value,
       senderId: user.uid,
       senderName: user.displayName,
       createdAt: Date.now(),
     });
 
-    // Increment unread counter for the recipient
     await runTransaction(
       ref(db, `unread/${selectedUser.uid}/${user.uid}`),
       (current) => (current || 0) + 1
     );
-  };
 
-  const handleSend = async () => {
-    await sendMessage(value);
     setValue("");
+    setShowEmojis(false);
   };
 
   return (
-    <div className="flex gap-2 p-3 border-t">
+    <div className="relative flex gap-2 p-3 border-t items-center">
+      {/* Emoji button */}
+      <button
+        type="button"
+        onClick={() => setShowEmojis((p) => !p)}
+        className="text-muted-foreground hover:text-foreground"
+      >
+        <Smile size={22} />
+      </button>
+
+      {/* Emoji picker */}
+      {showEmojis && (
+        <div className="absolute bottom-14 left-2 z-50">
+          <EmojiPicker
+            onEmojiClick={handleEmojiClick}
+            height={350}
+            width={300}
+          />
+        </div>
+      )}
+
       <Input
-        placeholder="write a message"
+        placeholder="Write a message..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
