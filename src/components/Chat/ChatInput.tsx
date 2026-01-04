@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/Hooks/useAuth";
-import { push, ref } from "firebase/database";
+import { push, ref,  runTransaction } from "firebase/database";
 import { db } from "@/firebase/firebaseConfig";
 import type { ChatUser } from "@/Types/backendTypes";
 
@@ -15,24 +15,37 @@ export default function ChatInput({
   const [value, setValue] = useState("");
   const { user } = useAuth();
 
+  if (!user) return null;
+
   const chatId =
-    user!.uid < selectedUser.uid
-      ? `${user!.uid}_${selectedUser.uid}`
-      : `${selectedUser.uid}_${user!.uid}`;
+    user.uid < selectedUser.uid
+      ? `${user.uid}_${selectedUser.uid}`
+      : `${selectedUser.uid}_${user.uid}`;
 
   const sendMessage = async (text: string) => {
-    if (!text.trim()) return;
-
-    await push(ref (db, `messages/${chatId}`), {
+    if (!text.trim()) {
+      toast.error("empty message");
+      return;
+    } else {
+      toast.success("sent successfully");
+    }
+    //sending msg
+    await push(ref(db, `messages/${chatId}`), {
       text,
-      senderId: user?.uid,
-      senderName: user?.displayName,
+      senderId: user.uid,
+      senderName: user.displayName,
       createdAt: Date.now(),
     });
+
+    // Increment unread counter for the recipient
+    await runTransaction(
+      ref(db, `unread/${selectedUser.uid}/${user.uid}`),
+      (current) => (current || 0) + 1
+    );
   };
-  const handleSend = () => {
-    sendMessage(value);
-    toast.success("sent successfully"); //here
+
+  const handleSend = async () => {
+    await sendMessage(value);
     setValue("");
   };
 
@@ -45,9 +58,7 @@ export default function ChatInput({
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
       />
 
-      <Button variant="default" onClick={handleSend}>
-        Send
-      </Button>
+      <Button onClick={handleSend}>Send</Button>
     </div>
   );
 }

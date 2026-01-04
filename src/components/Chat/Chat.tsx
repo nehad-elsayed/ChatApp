@@ -5,7 +5,7 @@ import ChatInput from "./ChatInput";
 import ChatSidebar from "./Sidebar";
 import { useAuth } from "@/Hooks/useAuth";
 import type { Message, ChatUser } from "@/Types/backendTypes";
-import { onValue, ref } from "firebase/database";
+import { onValue, ref,  remove } from "firebase/database";
 import { db } from "@/firebase/firebaseConfig";
 import MessageBubble from "./MessageBubble";
 
@@ -15,6 +15,13 @@ export default function Chat() {
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  // Clear unread status when opening a chat
+  useEffect(() => {
+    if (!selectedUser || !user?.uid) return;
+
+    remove(ref(db, `unread/${user.uid}/${selectedUser.uid}`));
+  }, [selectedUser, user?.uid]);
 
   useEffect(() => {
     if (!selectedUser || !user?.uid) return;
@@ -99,3 +106,9 @@ export default function Chat() {
     </div>
   );
 }
+// {
+//   "rules": {
+//     ".read": true,
+//     ".write": true
+//   }
+// }
