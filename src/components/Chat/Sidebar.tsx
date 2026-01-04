@@ -11,7 +11,9 @@
 // export default function ChatSidebar({ onSelectUser }: Props) {
 //   const { user } = useAuth();
 //   const [users, setUsers] = useState<ChatUser[]>([]);
-
+//   // const [unread, setUnread] = useState<Record<string, boolean>>({});
+//   const [unread, setUnread] = useState<Record<string, number>>({});
+//   // users list
 //   useEffect(() => {
 //     const usersRef = ref(db, "users");
 
@@ -29,6 +31,39 @@
 //     return () => unsubscribe();
 //   }, [user?.uid]);
 
+//   // unread listener - listen to unread counter
+//   useEffect(() => {
+//     if (!user) return;
+
+//     const unreadRef = ref(db, `unread/${user.uid}`);
+
+//     const unsubscribe = onValue(unreadRef, (snapshot) => {
+//       const data = snapshot.val();
+
+//       // Convert to Record<string, number>
+//       const unreadData: Record<string, number> = {};
+//       if (data) {
+//         Object.keys(data).forEach((uid) => {
+//           const count = data[uid];
+
+//           // Handle both number and boolean (for backward compatibility)
+//           if (typeof count === "number") {
+//             if (count > 0) {
+//               unreadData[uid] = count;
+//             }
+//           } else if (count === true) {
+//             // If it's true, treat it as 1
+//             unreadData[uid] = 1;
+//           }
+//         });
+//       }
+//       console.log("🔍 Processed unread data:", unreadData);
+//       setUnread(unreadData);
+//     });
+
+//     return () => unsubscribe();
+//   }, [user?.uid]);
+
 //   return (
 //     <div className="w-64 border-r h-full">
 //       <div className="p-3 font-semibold border-b">Chats</div>
@@ -38,9 +73,21 @@
 //           <div
 //             key={u.uid}
 //             onClick={() => onSelectUser(u)}
-//             className="p-3 cursor-pointer hover:bg-muted transition"
+//             className="p-3 flex items-center justify-between cursor-pointer hover:bg-muted transition"
 //           >
-//             {u.username}
+//             <span>{u.username}</span>
+//             {(() => {
+//               const count = unread[u.uid];
+//               console.log(
+//                 `🔍 Rendering user ${u.username} (${u.uid}): unread count =`,
+//                 count
+//               );
+//               return count !== undefined && count > 0 ? (
+//                 <span className="min-w-5 h-5 px-1 text-xs flex items-center justify-center rounded-full bg-red-500 text-white">
+//                   {count}
+//                 </span>
+//               ) : null;
+//             })()}
 //           </div>
 //         ))}
 //       </div>
@@ -60,18 +107,23 @@ type Props = {
 export default function ChatSidebar({ onSelectUser }: Props) {
   const { user } = useAuth();
   const [users, setUsers] = useState<ChatUser[]>([]);
-  // const [unread, setUnread] = useState<Record<string, boolean>>({});
   const [unread, setUnread] = useState<Record<string, number>>({});
-  // users list
+
+  // 🔹 Load users list
   useEffect(() => {
+    if (!user?.uid) return;
+
     const usersRef = ref(db, "users");
 
     const unsubscribe = onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
-      if (!data) return;
+      if (!data) {
+        setUsers([]);
+        return;
+      }
 
       const formatted = Object.values(data as Record<string, ChatUser>).filter(
-        (u) => u.uid !== user?.uid
+        (u) => u.uid !== user.uid
       );
 
       setUsers(formatted);
@@ -80,72 +132,44 @@ export default function ChatSidebar({ onSelectUser }: Props) {
     return () => unsubscribe();
   }, [user?.uid]);
 
-  // unread listener - listen to unread counter
+  // 🔹 Listen to unread counters
   useEffect(() => {
-    if (!user) return;
+    if (!user?.uid) return;
 
     const unreadRef = ref(db, `unread/${user.uid}`);
 
     const unsubscribe = onValue(unreadRef, (snapshot) => {
-      const data = snapshot.val();
-      console.log("🔍 Unread data from Firebase:", data);
-      console.log("🔍 Current user:", user.uid);
-
-      // Convert to Record<string, number>
-      const unreadData: Record<string, number> = {};
-      if (data) {
-        Object.keys(data).forEach((uid) => {
-          const count = data[uid];
-          console.log(
-            `🔍 Unread for user ${uid}:`,
-            count,
-            "type:",
-            typeof count
-          );
-          // Handle both number and boolean (for backward compatibility)
-          if (typeof count === "number") {
-            if (count > 0) {
-              unreadData[uid] = count;
-            }
-          } else if (count === true) {
-            // If it's true, treat it as 1
-            unreadData[uid] = 1;
-          }
-        });
-      }
-      console.log("🔍 Processed unread data:", unreadData);
-      setUnread(unreadData);
+      const data = snapshot.val() as Record<string, number> | null;
+      setUnread(data || {});
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user?.uid]);
 
   return (
     <div className="w-64 border-r h-full">
       <div className="p-3 font-semibold border-b">Chats</div>
 
       <div className="overflow-y-auto">
-        {users.map((u) => (
-          <div
-            key={u.uid}
-            onClick={() => onSelectUser(u)}
-            className="p-3 flex items-center justify-between cursor-pointer hover:bg-muted transition"
-          >
-            <span>{u.username}</span>
-            {(() => {
-              const count = unread[u.uid];
-              console.log(
-                `🔍 Rendering user ${u.username} (${u.uid}): unread count =`,
-                count
-              );
-              return count !== undefined && count > 0 ? (
+        {users.map((u) => {
+          const count = unread[u.uid];
+
+          return (
+            <div
+              key={u.uid}
+              onClick={() => onSelectUser(u)}
+              className="p-3 flex items-center justify-between cursor-pointer hover:bg-muted transition"
+            >
+              <span>{u.username}</span>
+
+              {count > 0 && (
                 <span className="min-w-5 h-5 px-1 text-xs flex items-center justify-center rounded-full bg-red-500 text-white">
                   {count}
                 </span>
-              ) : null;
-            })()}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
